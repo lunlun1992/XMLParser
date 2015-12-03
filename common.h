@@ -2,8 +2,12 @@
 #define COMMON_H
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
+#include <string.h>
+#ifndef __GNUC__
+#include <stdint.h>
+#else
 #include <sys/types.h>
+#endif
 #define DATA_SET_MAX 10240
 #define MAX_COUNT_EVENTS 10000
 #define MAX_COUNT_DATA_SETS 100000
@@ -30,7 +34,7 @@ typedef struct XMLDataSet_t
 {
 	char *p_start_data_set;
 	int64_t i_data_set_length;
-	XMLEvents *events[MAX_COUNT_EVENTS];
+	XMLEvents *events[MAX_COUNT_EVENTS];//TODO: use realloc to avoid static array length
 	int64_t i_events;
 
 	char *XMLstream;

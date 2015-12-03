@@ -1,6 +1,6 @@
 #include "divide_event.h"
 
-static inline void divide_event_edge_etag(XMLDataSet *dataset, char *pdata, int *i)
+static _inline void divide_event_edge_etag(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -10,7 +10,7 @@ static inline void divide_event_edge_etag(XMLDataSet *dataset, char *pdata, int 
 	dataset->events[dataset->i_events++] = event;
 }
 
-static inline void divide_event_edge_com_cdata(XMLDataSet *dataset, char *pdata, int *i)
+static _inline void divide_event_edge_com_cdata(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -37,7 +37,7 @@ static inline void divide_event_edge_com_cdata(XMLDataSet *dataset, char *pdata,
 	}
 }
 
-static inline void divide_event_edge_pi(XMLDataSet *dataset, char *pdata, int *i)
+static _inline void divide_event_edge_pi(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -50,7 +50,7 @@ static inline void divide_event_edge_pi(XMLDataSet *dataset, char *pdata, int *i
 	dataset->events[dataset->i_events++] = event;
 }
 
-static inline void divide_event_edge_stag(XMLDataSet *dataset, char *pdata, int *i)
+static _inline void divide_event_edge_stag(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -61,7 +61,7 @@ static inline void divide_event_edge_stag(XMLDataSet *dataset, char *pdata, int 
 }
 
 
-static inline void divide_event_etag(XMLDataSet *dataset, char *pdata, int *i)
+static _inline void divide_event_etag(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -70,7 +70,7 @@ static inline void divide_event_etag(XMLDataSet *dataset, char *pdata, int *i)
 	(*i)++;
 	dataset->events[dataset->i_events++] = event;
 }
-static inline void divide_event_com_cdata(XMLDataSet *dataset, char *pdata, int *i)
+static _inline void divide_event_com_cdata(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -120,7 +120,7 @@ static inline void divide_event_com_cdata(XMLDataSet *dataset, char *pdata, int 
 		(*i) += 8;
 	}
 }
-static inline void divide_event_pi(XMLDataSet *dataset, char *pdata, int *i)
+static _inline void divide_event_pi(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -137,7 +137,7 @@ static inline void divide_event_pi(XMLDataSet *dataset, char *pdata, int *i)
 	event->i_event_length = pdata + *i - event->p_event_start;
 	dataset->events[dataset->i_events++] = event;
 }
-static inline void divide_event_stag(XMLDataSet *dataset, char *pdata, int *i)
+static _inline void divide_event_stag(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -154,9 +154,9 @@ void divide_event_edge(XMLDataSet *dataset, char *pdata, int64_t length)
 	dataset->i_data_set_length = length;
 	while(i < length)
 	{
-		if(pdata[i] == '<')
+		if (pdata[i] == '<')
 		{
-			switch(pdata[i + 1])
+			switch (pdata[i + 1])
 			{
 			case '/':
 				divide_event_edge_etag(dataset, pdata, &i);
@@ -171,6 +171,8 @@ void divide_event_edge(XMLDataSet *dataset, char *pdata, int64_t length)
 				divide_event_edge_stag(dataset, pdata, &i);
 			}
 		}
+		else
+			i++;
 	}
 }
 
@@ -180,15 +182,15 @@ int64_t divide_event(XMLDataSet *dataset, char *pdata)
 	dataset->p_start_data_set = pdata;
 	while(i < DATA_SET_MAX)
 	{
-		if(i + 1 == DATA_SET_MAX)
+		if (pdata[i] == '<')
 		{
-			dataset->i_data_set_length = DATA_SET_MAX - 1;
-			pdata += DATA_SET_MAX - 1;
-			return dataset->i_data_set_length;
-		}
-		if(pdata[i] == '<')
-		{
-			switch(pdata[i + 1])
+			if (i + 1 == DATA_SET_MAX)
+			{
+				dataset->i_data_set_length = DATA_SET_MAX - 1;
+				pdata += DATA_SET_MAX - 1;
+				return dataset->i_data_set_length;
+			}
+			switch (pdata[i + 1])
 			{
 			case '/':
 				divide_event_etag(dataset, pdata, &i);
@@ -203,12 +205,14 @@ int64_t divide_event(XMLDataSet *dataset, char *pdata)
 				divide_event_stag(dataset, pdata, &i);
 			}
 		}
+		else
+			i++;
 	}
 
 	dataset->i_data_set_length = dataset->events[dataset->i_events - 1]->p_event_start - pdata;
 	pdata = dataset->events[dataset->i_events - 1]->p_event_start;
 	free(dataset->events[dataset->i_events - 1]);//remount to the last TAG
-	dataset->i_events--;
+	dataset->events[--dataset->i_events] = NULL;
 
 	return dataset->i_data_set_length;
 }
