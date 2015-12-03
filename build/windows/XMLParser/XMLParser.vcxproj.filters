@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\..\..\common.h" />
+    <ClInclude Include="..\..\..\divide_event.h" />
+    <ClInclude Include="..\..\..\file_io.h" />
+    <ClInclude Include="..\..\..\parse_event.h" />
+    <ClInclude Include="..\..\..\post_process.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\divide_event.c" />
+    <ClCompile Include="..\..\..\file_io.c" />
+    <ClCompile Include="..\..\..\main.c" />
+    <ClCompile Include="..\..\..\parse_event.c" />
+    <ClCompile Include="..\..\..\post_process.c" />
+  </ItemGroup>
+</Project>
