@@ -1,6 +1,5 @@
 #ifndef FILE_IO_H_
 #define FILE_IO_H_
-
 #include "common.h"
 #include "divide_event.h"
 

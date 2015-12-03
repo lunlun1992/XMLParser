@@ -7,16 +7,14 @@
 #define DATA_SET_MAX 10240
 #define MAX_COUNT_EVENTS 10000
 #define MAX_COUNT_DATA_SETS 100000
+
 typedef enum XMLEventLabel_t
 {
 	STAG = 1,
 	ETAG = 2,
-	STARTPI = 3,
-	ENDPI = 4,
-	STARTCOMMENT = 5,
-	ENDCOMMENT = 6,
-	STARTCDATA = 7,
-	ENDCDATA = 8
+	PI = 3,
+	COMMENT = 4,
+	CDATA = 5
 }XMLEventLabel;
 
 typedef struct XMLEvents_t

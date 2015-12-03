@@ -37,7 +37,7 @@ XMLParserContext *read_XML_file(char *in, char *out)
 	while(i < length)
 	{
 		XMLDataSet *dataset = (XMLDataSet *)malloc(sizeof(XMLDataSet));
-
+		memset(dataset, 0, sizeof(XMLDataSet));
 		//when the rest is no more than max, deal in a separate way.
 		if(length - i < DATA_SET_MAX)
 		{
@@ -46,7 +46,9 @@ XMLParserContext *read_XML_file(char *in, char *out)
 		}
 		else
 		{
-			i += divide_event(dataset, pdata);
+			int64_t eventlen = divide_event(dataset, pdata);
+			pdata += eventlen;
+			i += eventlen;
 		}
 		h->pp_data_sets[h->i_count_data_sets++] = dataset;
 	}
