@@ -1,6 +1,6 @@
 #include "divide_event.h"
 
-static _inline void divide_event_edge_etag(XMLDataSet *dataset, char *pdata, int *i)
+static  void divide_event_edge_etag(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -10,7 +10,7 @@ static _inline void divide_event_edge_etag(XMLDataSet *dataset, char *pdata, int
 	dataset->events[dataset->i_events++] = event;
 }
 
-static _inline void divide_event_edge_com_cdata(XMLDataSet *dataset, char *pdata, int *i)
+static  void divide_event_edge_com_cdata(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -37,7 +37,7 @@ static _inline void divide_event_edge_com_cdata(XMLDataSet *dataset, char *pdata
 	}
 }
 
-static _inline void divide_event_edge_pi(XMLDataSet *dataset, char *pdata, int *i)
+static  void divide_event_edge_pi(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -50,7 +50,7 @@ static _inline void divide_event_edge_pi(XMLDataSet *dataset, char *pdata, int *
 	dataset->events[dataset->i_events++] = event;
 }
 
-static _inline void divide_event_edge_stag(XMLDataSet *dataset, char *pdata, int *i)
+static  void divide_event_edge_stag(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -61,7 +61,7 @@ static _inline void divide_event_edge_stag(XMLDataSet *dataset, char *pdata, int
 }
 
 
-static _inline void divide_event_etag(XMLDataSet *dataset, char *pdata, int *i)
+static  void divide_event_etag(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -70,7 +70,7 @@ static _inline void divide_event_etag(XMLDataSet *dataset, char *pdata, int *i)
 	(*i)++;
 	dataset->events[dataset->i_events++] = event;
 }
-static _inline void divide_event_com_cdata(XMLDataSet *dataset, char *pdata, int *i)
+static  void divide_event_com_cdata(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -120,7 +120,7 @@ static _inline void divide_event_com_cdata(XMLDataSet *dataset, char *pdata, int
 		(*i) += 8;
 	}
 }
-static _inline void divide_event_pi(XMLDataSet *dataset, char *pdata, int *i)
+static  void divide_event_pi(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -137,7 +137,7 @@ static _inline void divide_event_pi(XMLDataSet *dataset, char *pdata, int *i)
 	event->i_event_length = pdata + *i - event->p_event_start;
 	dataset->events[dataset->i_events++] = event;
 }
-static _inline void divide_event_stag(XMLDataSet *dataset, char *pdata, int *i)
+static  void divide_event_stag(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
