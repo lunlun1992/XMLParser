@@ -56,43 +56,43 @@ bool CDEnd_judge(char *c)
 /*
 bool CharData_judge(char *c)
 {
-	int i = 0;
-	while (c[i] != '-')
-	{
-		if (c[i] != '<' && c[i] != '&')
-			i++;
-		else
-			return false;
-	}
-	i++;
-	while (c[i] != ']')
-	{
-		if (c[i] != '<' && c[i] != '&')
-			i++;
-		else
-			return false;
-	}
-	if (c[i + 1] != ']' && c[i + 2] != '>')
-		return false;
-	else
-	{
-		i += 3;
-		while (c[i] != '<')                     //CharData end when meet '<' ????
-		{
-			if (c[i] != '<' && c[i] != '&')
-				i++;
-			else
-				return false;
-		}
-	}
-	return true;
+int i = 0;
+while (c[i] != '-')
+{
+if (c[i] != '<' && c[i] != '&')
+i++;
+else
+return false;
+}
+i++;
+while (c[i] != ']')
+{
+if (c[i] != '<' && c[i] != '&')
+i++;
+else
+return false;
+}
+if (c[i + 1] != ']' && c[i + 2] != '>')
+return false;
+else
+{
+i += 3;
+while (c[i] != '<')                     //CharData end when meet '<' ????
+{
+if (c[i] != '<' && c[i] != '&')
+i++;
+else
+return false;
+}
+}
+return true;
 
 }*/
 
 bool CharRef_judge(char *c)
 {
 	int i = 0;
-	if (c[i] == '&' && c[i+1] == '#' && c[i+2] != 'x')
+	if (c[i] == '&' && c[i + 1] == '#' && c[i + 2] != 'x')
 	{
 		i = 2;
 		while (c[i] != ';')
@@ -200,15 +200,15 @@ bool Attribute_judge(char *c)
 	int i = 1;
 	if (!NameStartChar_judge(c[0]))
 		return false;
-	while (c[i] !=' ' && c[i] != '\r' && c[i] != '\t' &&
-		   c[i] !='\n' && c[i] != '=')
+	while (c[i] != ' ' && c[i] != '\r' && c[i] != '\t' &&
+		c[i] != '\n' && c[i] != '=')
 	{
 		if (!NameChar_judge(c[i]))
 			return false;
 		else
 			i++;
 	}
-	if ((c[i] == ' ' || c[i] == '\r' || c[i] == '\t' || c[i] == '\n') && c[i+1] == "=")  //S=
+	if ((c[i] == ' ' || c[i] == '\r' || c[i] == '\t' || c[i] == '\n') && c[i + 1] == "=")  //S=
 	{
 		if (c[i + 2] != '"' && c[i + 2] != '\'')  //S=S
 		{
@@ -216,7 +216,7 @@ bool Attribute_judge(char *c)
 				return false;
 		}
 		else
-			return AttValue_judge(c+2);
+			return AttValue_judge(c + 2);
 	}
 	else if (c[i] == '=') // =
 	{
@@ -254,7 +254,9 @@ void CDATA_Parse(XMLEvents *current_event)
 			n++;
 		}
 	}
-	printf("%s\n", current_event->event_stream);
+
+	current_event->i_event_stream_length = i;
+	//printf("%s\n", current_event->event_stream);
 	if (statues != NoError)
 		printf("CDATA Parse is wrong, the error value is %d\n", statues);
 }
@@ -275,7 +277,7 @@ void PI_Parse(XMLEvents *current_event)
 		i = 4;
 		k = 4;
 		current_event->event_stream[3] = current_event->p_event_start[3];
-		while(!(current_event->p_event_start[k] == '?' && current_event->p_event_start[k+1] == '>'))     // not end
+		while (!(current_event->p_event_start[k] == '?' && current_event->p_event_start[k + 1] == '>'))     // not end
 		{
 			if (current_event->p_event_start[k] == ' ' || current_event->p_event_start[k] == '\r' ||
 				current_event->p_event_start[k] == '\t' || current_event->p_event_start[k] == '\n')
@@ -332,7 +334,7 @@ void PI_Parse(XMLEvents *current_event)
 						break;
 					}
 				}
-				while(k < current_event->i_event_length - 3)  //avoid current_event->p_event_start[k + 3] out of length
+				while (k < current_event->i_event_length - 3)  //avoid current_event->p_event_start[k + 3] out of length
 				{
 					if (Char_judge(current_event->p_event_start[k]) && current_event->p_event_start[k + 1] == '?' &&
 						current_event->p_event_start[k + 2] == '>' &&  Char_judge(current_event->p_event_start[k + 3]))
@@ -361,7 +363,9 @@ void PI_Parse(XMLEvents *current_event)
 			}
 		}
 	}
-	printf("%s\n", current_event->event_stream);
+	
+	current_event->i_event_stream_length = i;
+	//printf("%s\n", current_event->event_stream);
 	if (statues != NoError)
 		printf("PI Parse is wrong, the error value is %d\n", statues);
 }
@@ -375,7 +379,7 @@ void Comment_Parse(XMLEvents *current_event)
 	current_event->event_stream[1] = ' ';
 	k = 4;
 	i = 2;
-	while (!(current_event->p_event_start[k] == '-' && current_event->p_event_start[k+1] == '-' && current_event->p_event_start[k+2] == '>'))
+	while (!(current_event->p_event_start[k] == '-' && current_event->p_event_start[k + 1] == '-' && current_event->p_event_start[k + 2] == '>'))
 	{
 		if (Char_judge(current_event->p_event_start[k]))
 		{
@@ -394,8 +398,10 @@ void Comment_Parse(XMLEvents *current_event)
 			break;;
 		}
 	}
-	current_event->i_event_length = k+2;
-	printf("%s\n", current_event->event_stream);
+	current_event->i_event_length = k + 2;
+
+	current_event->i_event_stream_length = i;
+	//printf("%s\n", current_event->event_stream);
 	if (statues != NoError)
 		printf("Comment Parse is wrong, the error value is %d\n", statues);
 }
@@ -415,7 +421,7 @@ void STAG_Parse(XMLEvents *current_event)
 		k = 0;
 		while (current_event->p_event_start[k] != '>')
 			k++;
-		if (current_event->p_event_start[k-1] == '/')
+		if (current_event->p_event_start[k - 1] == '/')
 		{
 			current_event->event_stream[0] = 'E';
 			current_event->event_stream[1] = 'M';
@@ -589,10 +595,12 @@ void STAG_Parse(XMLEvents *current_event)
 						k++;
 				}
 			}
-		}	
+		}
 	}
 	current_event->i_event_length = k;
- 	printf("%s\n", current_event->event_stream);
+
+	current_event->i_event_stream_length = i;
+	//printf("%s\n", current_event->event_stream);
 	if (statues != NoError)
 		printf("STAG Parse is wrong, the error value is %d\n", statues);
 }
@@ -603,10 +611,10 @@ void ETAG_Parse(XMLEvents *current_event)
 	current_event->event_stream = (char*)malloc(sizeof(char) * Event_Stream_Size);    //outstream buffer
 	memset(current_event->event_stream, 0, sizeof(char) * Event_Stream_Size);
 	//NameStartChart judge
-    if (!NameStartChar_judge(current_event->p_event_start[2]))
+	if (!NameStartChar_judge(current_event->p_event_start[2]))
 	{
 		statues = 2;
-		return ;
+		return;
 	}
 	else
 	{
@@ -617,8 +625,8 @@ void ETAG_Parse(XMLEvents *current_event)
 		i = 3;   //event_stream index
 		k = 2;   //p_event_start offset
 		while (current_event->p_event_start[k] != ' ' && current_event->p_event_start[k] != '\t' &&
-			   current_event->p_event_start[k] != '\n' && current_event->p_event_start[k] != '\r' &&
-			   current_event->p_event_start[k] != '>')
+			current_event->p_event_start[k] != '\n' && current_event->p_event_start[k] != '\r' &&
+			current_event->p_event_start[k] != '>')
 		{
 			if (!NameChar_judge(current_event->p_event_start[k]))
 			{
@@ -643,35 +651,37 @@ void ETAG_Parse(XMLEvents *current_event)
 		}
 	}
 	current_event->i_event_length = k;
-	printf("%s\n", current_event->event_stream);
+	
+	current_event->i_event_stream_length = i;
+	//printf("%s\n", current_event->event_stream);
 	if (statues != NoError)
 		printf("ETAG Parse is wrong, the error value is %d\n", statues);
 }
 
 //deal with data sets and sequance them
-void parse_events(XMLParserContext *h, int64_t data_set_index)  
+void parse_events(XMLParserContext *h, int64_t data_set_index)
 {
-	int j ;
+	int j;
 	for (j = 0; j < h->pp_data_sets[data_set_index]->i_events; j++)
 	{
 		XMLEvents *current_event = h->pp_data_sets[data_set_index]->events[j];
-		switch(current_event->i_label)
+		switch (current_event->i_label)
 		{
-			case STAG:
-				STAG_Parse(current_event);
-				break;
-			case ETAG:
-				ETAG_Parse(current_event);
-				break;
-			case COMMENT:
-				Comment_Parse(current_event);
-				break;
-			case PI:
-				PI_Parse(current_event);
-				break;
-			case CDATA:
-				CDATA_Parse(current_event);
-				break;
+		case STAG:
+			STAG_Parse(current_event);
+			break;
+		case ETAG:
+			ETAG_Parse(current_event);
+			break;
+		case COMMENT:
+			Comment_Parse(current_event);
+			break;
+		case PI:
+			PI_Parse(current_event);
+			break;
+		case CDATA:
+			CDATA_Parse(current_event);
+			break;
 		}
 	}
 }

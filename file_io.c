@@ -14,7 +14,7 @@ XMLParserContext *read_XML_file(char *in, char *out)
 	{
 		printf("file open error 1\n");
 	}
-	h->XMLstreamout = fopen(out, "ab");
+	h->XMLstreamout = fopen(out, "wb"); // ab
 	if(NULL == h->XMLstreamout)
 	{
 		printf("file open error 2\n");
@@ -52,25 +52,34 @@ XMLParserContext *read_XML_file(char *in, char *out)
 		}
 		h->pp_data_sets[h->i_count_data_sets++] = dataset;
 	}
+
+	//h->unresolved_stag_num = 0;
+	h->unresolved_stag_stack_head = (XMLSTagStack*)malloc(sizeof(XMLSTagStack));
+	h->unresolved_stag_stack_head->next = NULL;
+	strcpy(h->unresolved_stag_stack_head->name, "");
+
 	return h;
 }
 
 void release_XML_file(XMLParserContext *h)
 {
-	int64_t i;
-	for(i = 0; i < h->i_count_data_sets; i++)
+	while (h->unresolved_stag_stack_head->next != NULL)
 	{
-		int j;
+		printf("Error: redundant STAG %d\n", top_stag(h));
+		pop_stag(h);
+	}
+	free(h->unresolved_stag_stack_head);
+
+	for (int64_t i = 0; i < h->i_count_data_sets; i++)
+	{
 		XMLDataSet *dataset = h->pp_data_sets[i];
-		if(!fwrite(dataset->XMLstream, h->XMLlength, 1, h->XMLstreamout))
+		if (!fwrite(dataset->XMLstream, dataset->XMLstream_length, 1, h->XMLstreamout))
 			printf("file write %I64d error\n", i);
-		for(j = 0; j < dataset->i_events; j++)
-		{
-			free(dataset->events[j]->event_stream);
-			free(dataset->events[j]);
-		}
+
 		free(dataset->XMLstream);
+		free(dataset);
 	}
 	fclose(h->XMLstreamout);
 	free(h->XMLbuf);
 }
+
