@@ -7,14 +7,13 @@ int main(int argc, char **argv)
 {
 	XMLParserContext *h;
 	int i;
-	printf("%d\n", argc);
 	if(argc != 3)
 	{
 		printf("error input args\n");
 		system("pause");
 		return 0;
 	}
-	h = read_XML_file(argv[1], argv[2]);
+	h = read_XML_file(argv[1]);
 
 	for(i = 0; i < h->i_count_data_sets; i++)
 	{
@@ -22,7 +21,7 @@ int main(int argc, char **argv)
 		post_process(h, i);
 	}
 
-	release_XML_file(h);
+	release_XML_file(h, argv[2]);
 
 	system("pause");
 	return 0;

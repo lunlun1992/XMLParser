@@ -60,7 +60,8 @@ typedef struct XMLDataSet_t
 
 typedef struct XMLSTagStack_t
 {
-	char name[STAG_NAME_LEN];
+	int dataset_index;
+	int event_index;
 	struct XMLSTagStack_t *next;
 }XMLSTagStack;
 
