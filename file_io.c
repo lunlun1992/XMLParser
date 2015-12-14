@@ -45,6 +45,8 @@ XMLParserContext *read_XML_file(char *in)
 			pdata += eventlen;
 			i += eventlen;
 		}
+		if (error_state == 1)
+			return NULL;
 		h->pp_data_sets[h->i_count_data_sets++] = dataset;
 	}
 

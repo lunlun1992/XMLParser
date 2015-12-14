@@ -14,7 +14,8 @@ int main(int argc, char **argv)
 		return 0;
 	}
 	h = read_XML_file(argv[1]);
-
+	if (h == NULL)
+		return 0;
 	for(i = 0; i < h->i_count_data_sets; i++)
 	{
 		parse_events(h, i);
@@ -23,6 +24,5 @@ int main(int argc, char **argv)
 
 	release_XML_file(h, argv[2]);
 
-	system("pause");
 	return 0;
 }

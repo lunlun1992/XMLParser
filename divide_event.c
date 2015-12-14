@@ -1,5 +1,6 @@
 #include "divide_event.h"
 
+error_state = 0;
 static  void divide_event_edge_etag(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
@@ -70,7 +71,7 @@ static  void divide_event_etag(XMLDataSet *dataset, char *pdata, int *i)
 	(*i)++;
 	dataset->events[dataset->i_events++] = event;
 }
-static  void divide_event_com_cdata(XMLDataSet *dataset, char *pdata, int *i)
+static void divide_event_com_cdata(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
 	memset(event, 0, sizeof(XMLEvents));
@@ -78,8 +79,16 @@ static  void divide_event_com_cdata(XMLDataSet *dataset, char *pdata, int *i)
 	{
 		event->i_label = COMMENT;
 		event->p_event_start = pdata + *i;
-		while(pdata[*i - 2] != '-' || pdata[*i - 1] != '-' || pdata[*i] != '>')
+		while (pdata[*i - 2] != '-' || pdata[*i - 1] != '-' || pdata[*i] != '>')
+		{
 			(*i)++;
+			if ((*i) == DATA_SET_MAX)
+			{
+				printf("event size is too large\n");
+				error_state = 1;
+				return;
+			}
+		}
 		if((*i) == DATA_SET_MAX)
 		{
 			dataset->events[dataset->i_events++] = event;
@@ -101,8 +110,16 @@ static  void divide_event_com_cdata(XMLDataSet *dataset, char *pdata, int *i)
 	{
 		event->i_label = CDATA;
 		event->p_event_start = pdata + *i;
-		while(pdata[*i - 2] != ']' || pdata[*i - 1] != ']' || pdata[*i] != '>')
+		while (pdata[*i - 2] != ']' || pdata[*i - 1] != ']' || pdata[*i] != '>')
+		{
 			(*i)++;
+			if ((*i) == DATA_SET_MAX)
+			{
+				printf("event size is too large\n");
+				error_state = 1;
+				return;
+			}
+		}
 		if((*i) == DATA_SET_MAX)
 		{
 			dataset->events[dataset->i_events++] = event;
@@ -126,8 +143,16 @@ static  void divide_event_pi(XMLDataSet *dataset, char *pdata, int *i)
 	memset(event, 0, sizeof(XMLEvents));
 	event->i_label = PI;
 	event->p_event_start = pdata + *i;
-	while((*i) < DATA_SET_MAX && (pdata[*i - 1] != '?' || pdata[*i] != '>'))
+	while ((*i) < DATA_SET_MAX && (pdata[*i - 1] != '?' || pdata[*i] != '>'))
+	{
 		(*i)++;
+		if ((*i) == DATA_SET_MAX)
+		{
+			printf("event size is too large\n");
+			error_state = 1;
+			return;
+		}
+	}
 	if((*i) == DATA_SET_MAX)
 	{
 		dataset->events[dataset->i_events++] = event;
@@ -173,6 +198,8 @@ void divide_event_edge(XMLDataSet *dataset, char *pdata, int64_t length)
 		}
 		else
 			i++;
+		if (error_state == 1)
+			return;
 	}
 }
 
@@ -207,8 +234,9 @@ int64_t divide_event(XMLDataSet *dataset, char *pdata)
 		}
 		else
 			i++;
+		if (error_state == 1)
+			return 0;
 	}
-
 	dataset->i_data_set_length = dataset->events[dataset->i_events - 1]->p_event_start - pdata;
 	pdata = dataset->events[dataset->i_events - 1]->p_event_start;
 	free(dataset->events[dataset->i_events - 1]);//remount to the last TAG

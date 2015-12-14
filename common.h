@@ -14,6 +14,8 @@
 #define Event_Stream_Size 1024
 #define STAG_NAME_LEN 100
 
+int error_state;
+
 typedef enum XMLEventLabel_t
 {
 	STAG = 1,
