@@ -12,6 +12,8 @@
 #define MAX_COUNT_EVENTS 10000
 #define MAX_COUNT_DATA_SETS 100000
 #define Event_Stream_Size 1024
+#define STAG_NAME_LEN 100
+
 typedef enum XMLEventLabel_t
 {
 	STAG = 1,
@@ -56,6 +58,13 @@ typedef struct XMLDataSet_t
 	int64_t XMLstream_length;
 }XMLDataSet;
 
+typedef struct XMLSTagStack_t
+{
+	int dataset_index;
+	int event_index;
+	struct XMLSTagStack_t *next;
+}XMLSTagStack;
+
 typedef struct XMLParserContext_t
 {
 	FILE *XMLfilein;
@@ -66,6 +75,8 @@ typedef struct XMLParserContext_t
 	int64_t i_count_data_sets;
 	XMLDataSet *pp_data_sets[MAX_COUNT_DATA_SETS];
 
+	//int unresolved_stag_num;
+	XMLSTagStack* unresolved_stag_stack_head;
 }XMLParserContext;
 
 #endif

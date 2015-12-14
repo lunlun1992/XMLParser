@@ -1,6 +1,6 @@
 #include "file_io.h"
 
-XMLParserContext *read_XML_file(char *in, char *out)
+XMLParserContext *read_XML_file(char *in)
 {
 	int64_t length;
 	int64_t i;
@@ -13,11 +13,6 @@ XMLParserContext *read_XML_file(char *in, char *out)
 	if(NULL == h->XMLfilein)
 	{
 		printf("file open error 1\n");
-	}
-	h->XMLstreamout = fopen(out, "ab");
-	if(NULL == h->XMLstreamout)
-	{
-		printf("file open error 2\n");
 	}
 	fseek(h->XMLfilein, 0, SEEK_END);
 	length = ftell(h->XMLfilein);
@@ -52,25 +47,53 @@ XMLParserContext *read_XML_file(char *in, char *out)
 		}
 		h->pp_data_sets[h->i_count_data_sets++] = dataset;
 	}
+
+	//h->unresolved_stag_num = 0;
+	h->unresolved_stag_stack_head = (XMLSTagStack*)malloc(sizeof(XMLSTagStack));
+	h->unresolved_stag_stack_head->next = NULL;
+	h->unresolved_stag_stack_head->dataset_index = 0;
+	h->unresolved_stag_stack_head->event_index = 0;
+
 	return h;
 }
 
-void release_XML_file(XMLParserContext *h)
+void release_XML_file(XMLParserContext *h, char* outFile)
 {
-	int64_t i;
-	for(i = 0; i < h->i_count_data_sets; i++)
+	while (h->unresolved_stag_stack_head->next != NULL)
 	{
-		int j;
+		XMLSTagStack* pstag = pop_stag(h);
+		char stag_name[STAG_NAME_LEN];
+		sscanf(h->pp_data_sets[pstag->dataset_index]->events[pstag->event_index]->event_stream + 3, "%[^ ]", stag_name);
+		printf("Error: STAG %s missing ETAG\n", stag_name);
+		free(pstag);
+	}
+	free(h->unresolved_stag_stack_head);
+
+	h->XMLstreamout = fopen(outFile, "wb"); 
+	if (NULL == h->XMLstreamout)
+	{
+		printf("file open error 2\n");
+	}
+
+	for (int64_t i = 0; i < h->i_count_data_sets; i++)
+	{
 		XMLDataSet *dataset = h->pp_data_sets[i];
-		if(!fwrite(dataset->XMLstream, h->XMLlength, 1, h->XMLstreamout))
-			printf("file write %I64d error\n", i);
-		for(j = 0; j < dataset->i_events; j++)
+		for (int j = 0; j < dataset->i_events; j++)
 		{
-			free(dataset->events[j]->event_stream);
-			free(dataset->events[j]);
+			XMLEvents *cur_event = dataset->events[j];
+			if (!fwrite(cur_event->event_stream, cur_event->i_event_stream_length, 1, h->XMLstreamout))
+				printf("file write %I64d error\n", j);
+
+			free(cur_event->event_stream);
+			free(cur_event);
 		}
+		//if (!fwrite(dataset->XMLstream, dataset->XMLstream_length, 1, h->XMLstreamout))
+		//	printf("file write %I64d error\n", i);
+
 		free(dataset->XMLstream);
+		free(dataset);
 	}
 	fclose(h->XMLstreamout);
 	free(h->XMLbuf);
 }
+
