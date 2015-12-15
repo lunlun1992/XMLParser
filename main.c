@@ -10,7 +10,6 @@ int main(int argc, char **argv)
 	if(argc != 3)
 	{
 		printf("error input args\n");
-		system("pause");
 		return 0;
 	}
 	h = read_XML_file(argv[1]);

@@ -1,5 +1,5 @@
 SRC_ROOT = ../..
-CFLAGS = -g -O2
+CFLAGS = -g -O2 -Wall
 LDFLAGS = -lpthread
 CC = gcc
 

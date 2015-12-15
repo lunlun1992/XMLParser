@@ -17,7 +17,6 @@ XMLParserContext *read_XML_file(char *in)
 	fseek(h->XMLfilein, 0, SEEK_END);
 	length = ftell(h->XMLfilein);
 	fseek(h->XMLfilein, 0, SEEK_SET);
-
 	h->XMLbuf = (char *)malloc(sizeof(char) * length);
 	if(!fread(h->XMLbuf, length, 1, h->XMLfilein))
 	{
@@ -29,6 +28,7 @@ XMLParserContext *read_XML_file(char *in)
 	pdata = h->XMLbuf;
 	i = 0;
 	h->i_count_data_sets = 0;
+	error_state = 0;
 	while(i < length)
 	{
 		XMLDataSet *dataset = (XMLDataSet *)malloc(sizeof(XMLDataSet));
@@ -61,6 +61,7 @@ XMLParserContext *read_XML_file(char *in)
 
 void release_XML_file(XMLParserContext *h, char* outFile)
 {
+	int64_t i, j;
 	while (h->unresolved_stag_stack_head->next != NULL)
 	{
 		XMLSTagStack* pstag = pop_stag(h);
@@ -77,14 +78,14 @@ void release_XML_file(XMLParserContext *h, char* outFile)
 		printf("file open error 2\n");
 	}
 
-	for (int64_t i = 0; i < h->i_count_data_sets; i++)
+	for (i = 0; i < h->i_count_data_sets; i++)
 	{
 		XMLDataSet *dataset = h->pp_data_sets[i];
-		for (int j = 0; j < dataset->i_events; j++)
+		for (j = 0; j < dataset->i_events; j++)
 		{
 			XMLEvents *cur_event = dataset->events[j];
 			if (!fwrite(cur_event->event_stream, cur_event->i_event_stream_length, 1, h->XMLstreamout))
-				printf("file write %I64d error\n", j);
+				printf("file write %lld error\n", j);
 
 			free(cur_event->event_stream);
 			free(cur_event);

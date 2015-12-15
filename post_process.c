@@ -20,11 +20,12 @@ XMLSTagStack* pop_stag(XMLParserContext *h)
 //deal with STAG & ETAG match or not
 void post_process(XMLParserContext *h, int64_t data_set_index)
 {
+	int i;
 	XMLDataSet* cur_dataset = h->pp_data_sets[data_set_index];
 	//cur_dataset->XMLstream_length = 0;
 	//cur_dataset->XMLstream = (char*)malloc(sizeof(char));
 
-	for (int i = 0; i < cur_dataset->i_events; i++)
+	for (i = 0; i < cur_dataset->i_events; i++)
 	{
 		XMLEvents *cur_event = cur_dataset->events[i];
 		/*

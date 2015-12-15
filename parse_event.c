@@ -114,6 +114,7 @@ bool CharRef_judge(char *c)
 				return false;
 		}
 	}
+	return true;
 }
 
 bool EntityRef_judge(char *c)
@@ -208,7 +209,7 @@ bool Attribute_judge(char *c)
 		else
 			i++;
 	}
-	if ((c[i] == ' ' || c[i] == '\r' || c[i] == '\t' || c[i] == '\n') && c[i + 1] == "=")  //S=
+	if ((c[i] == ' ' || c[i] == '\r' || c[i] == '\t' || c[i] == '\n') && c[i + 1] == '=')  //S=
 	{
 		if (c[i + 2] != '"' && c[i + 2] != '\'')  //S=S
 		{
@@ -228,6 +229,7 @@ bool Attribute_judge(char *c)
 		else
 			return AttValue_judge(c + i + 1);
 	}
+	return true;
 }
 
 void CDATA_Parse(XMLEvents *current_event)
@@ -264,7 +266,9 @@ void CDATA_Parse(XMLEvents *current_event)
 void PI_Parse(XMLEvents *current_event)
 {
 	bool haveS = false;
-	int i, k, n = 2;
+	int i = 0;
+	int k = 0;
+	int n = 2;
 	current_event->event_stream = (char*)malloc(sizeof(char) * Event_Stream_Size);    //outstream buffer
 	memset(current_event->event_stream, 0, sizeof(char) * Event_Stream_Size);
 	current_event->event_stream[0] = 'P';
@@ -624,9 +628,9 @@ void ETAG_Parse(XMLEvents *current_event)
 		current_event->event_stream[2] = ' ';
 		i = 3;   //event_stream index
 		k = 2;   //p_event_start offset
-		while (current_event->p_event_start[k] != ' ' && current_event->p_event_start[k] != '\t' &&
+		while ((current_event->p_event_start[k] != ' ' && current_event->p_event_start[k] != '\t' &&
 			current_event->p_event_start[k] != '\n' && current_event->p_event_start[k] != '\r' &&
-			current_event->p_event_start[k] != '>')
+			current_event->p_event_start[k] != '>') || ((current_event->p_event_start[k] == ' '|| 				current_event->p_event_start[k] == '\t' || current_event->p_event_start[k] == '\n' || 				current_event->p_event_start[k] == '\r') && current_event->p_event_start[k + 1] != '>' ))
 		{
 			if (!NameChar_judge(current_event->p_event_start[k]))
 			{
@@ -649,7 +653,9 @@ void ETAG_Parse(XMLEvents *current_event)
 				current_event->event_stream[i++] = current_event->p_event_start[k++];
 			}
 		}
+		current_event->event_stream[i++] = ' ';
 	}
+	
 	current_event->i_event_length = k;
 	
 	current_event->i_event_stream_length = i;

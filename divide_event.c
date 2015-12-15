@@ -1,6 +1,6 @@
 #include "divide_event.h"
 
-error_state = 0;
+
 static  void divide_event_edge_etag(XMLDataSet *dataset, char *pdata, int *i)
 {
 	XMLEvents *event = (XMLEvents *)malloc(sizeof(XMLEvents));
