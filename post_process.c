@@ -18,10 +18,10 @@ XMLSTagStack* pop_stag(XMLParserContext *h)
 
 
 //deal with STAG & ETAG match or not
-void post_process(XMLParserContext *h, int64_t data_set_index)
+void post_process(XMLParserContext *h)
 {
 	int i;
-	XMLDataSet* cur_dataset = h->pp_data_sets[data_set_index];
+	XMLDataSet* cur_dataset = h->pp_data_sets[h->i_post];
 	//cur_dataset->XMLstream_length = 0;
 	//cur_dataset->XMLstream = (char*)malloc(sizeof(char));
 
@@ -37,7 +37,7 @@ void post_process(XMLParserContext *h, int64_t data_set_index)
 
 		if (cur_event->event_stream[0] == 'S' && cur_event->event_stream[1] == 'E')
 		{
-			push_stag(h, data_set_index, i);
+			push_stag(h, h->i_post, i);
 		}
 		else if (cur_event->event_stream[0] == 'E' && cur_event->event_stream[1] == 'E')
 		{
@@ -61,4 +61,19 @@ void post_process(XMLParserContext *h, int64_t data_set_index)
 			}
 		}
 	}
+}
+
+void post_process_thread(XMLParserContext *h)
+{
+	while(h->i_post < h->i_count_data_sets)
+	{
+		pthread_mutex_lock(&pthread_param.mutex);
+		if(h->i_post  == h->i_parse)
+			pthread_cond_wait(&pthread_param.b_notempty, &pthread_param.mutex);
+		post_process(h);
+		h->i_post++;
+		pthread_cond_signal(&pthread_param.b_notfull);
+		pthread_mutex_unlock(&pthread_param.mutex);
+	}
+	pthread_exit(0);
 }

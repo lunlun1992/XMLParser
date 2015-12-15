@@ -7,6 +7,6 @@
 #define true 1
 #define false 0
 
-void parse_events(XMLParserContext *h, int64_t data_set_index);
-
+void parse_events(XMLParserContext *h);
+void parse_events_thread(XMLParserContext *h);
 #endif

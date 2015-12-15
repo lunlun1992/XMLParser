@@ -665,12 +665,12 @@ void ETAG_Parse(XMLEvents *current_event)
 }
 
 //deal with data sets and sequance them
-void parse_events(XMLParserContext *h, int64_t data_set_index)
+void parse_events(XMLParserContext *h)
 {
 	int j;
-	for (j = 0; j < h->pp_data_sets[data_set_index]->i_events; j++)
+	for (j = 0; j < h->pp_data_sets[h->i_parse]->i_events; j++)
 	{
-		XMLEvents *current_event = h->pp_data_sets[data_set_index]->events[j];
+		XMLEvents *current_event = h->pp_data_sets[h->i_parse]->events[j];
 		switch (current_event->i_label)
 		{
 		case STAG:
@@ -690,5 +690,20 @@ void parse_events(XMLParserContext *h, int64_t data_set_index)
 			break;
 		}
 	}
+}
+
+void parse_events_thread(XMLParserContext *h)
+{
+	while(h->i_parse < h->i_count_data_sets)
+	{
+		pthread_mutex_lock(&pthread_param.mutex);
+		if(h->i_parse == h->i_post + 1)
+			pthread_cond_wait(&pthread_param.b_notfull, &pthread_param.mutex);
+		parse_events(h);
+		h->i_parse++;
+		pthread_cond_signal(&pthread_param.b_notempty);
+		pthread_mutex_unlock(&pthread_param.mutex);
+	}
+	pthread_exit(0);
 }
 

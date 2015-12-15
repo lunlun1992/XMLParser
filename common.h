@@ -7,6 +7,7 @@
 #include <stdint.h>
 #else
 #include <sys/types.h>
+#include <sys/time.h>
 #endif
 #define DATA_SET_MAX 10240
 #define MAX_COUNT_EVENTS 10000
@@ -15,6 +16,15 @@
 #define STAG_NAME_LEN 100
 
 int error_state;
+
+struct pthread_param_t
+{
+	pthread_t id_receiver;
+	pthread_t id_sender;
+	pthread_cond_t b_notempty;
+	pthread_cond_t b_notfull;
+	pthread_mutex_t mutex;
+}pthread_param;
 
 typedef enum XMLEventLabel_t
 {
@@ -79,6 +89,10 @@ typedef struct XMLParserContext_t
 
 	//int unresolved_stag_num;
 	XMLSTagStack* unresolved_stag_stack_head;
+
+	//pthread
+	int64_t i_parse;
+	int64_t i_post;
 }XMLParserContext;
 
 #endif
