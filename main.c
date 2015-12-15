@@ -6,7 +6,10 @@
 int main(int argc, char **argv)
 {
 	XMLParserContext *h;
+	struct timeval start, end;
 	int i;
+	double timeuse;
+	gettimeofday(&start, NULL);
 	if(argc != 3)
 	{
 		printf("error input args\n");
@@ -22,6 +25,9 @@ int main(int argc, char **argv)
 	}
 
 	release_XML_file(h, argv[2]);
-
+	gettimeofday(&end, NULL);
+	timeuse  = 1000000*(end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec;
+	timeuse /= 1000;
+	printf("%.4lf ms time used\n", timeuse);
 	return 0;
 }

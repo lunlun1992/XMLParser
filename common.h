@@ -7,6 +7,7 @@
 #include <stdint.h>
 #else
 #include <sys/types.h>
+#include <sys/time.h>
 #endif
 #define DATA_SET_MAX 10240
 #define MAX_COUNT_EVENTS 10000
