@@ -665,12 +665,12 @@ void ETAG_Parse(XMLEvents *current_event)
 }
 
 //deal with data sets and sequance them
-void parse_events(XMLParserContext *h, int64_t data_set_index)
+void parse_events(XMLParserContext *h)
 {
 	int j;
-	for (j = 0; j < h->pp_data_sets[data_set_index]->i_events; j++)
+	for (j = 0; j < h->pp_data_sets[h->i_parse]->i_events; j++)
 	{
-		XMLEvents *current_event = h->pp_data_sets[data_set_index]->events[j];
+		XMLEvents *current_event = h->pp_data_sets[h->i_parse]->events[j];
 		switch (current_event->i_label)
 		{
 		case STAG:

@@ -2,11 +2,6 @@
 
 XMLParserContext *read_XML_file(char *in)
 {
-	int64_t length;
-	int64_t i;
-	char *pdata;
-
-	//read file
 	XMLParserContext *h = (XMLParserContext *)malloc(sizeof(XMLParserContext));
 	memset(h, 0, sizeof(XMLParserContext));
 	h->XMLfilein = fopen(in, "rb");
@@ -15,40 +10,14 @@ XMLParserContext *read_XML_file(char *in)
 		printf("file open error 1\n");
 	}
 	fseek(h->XMLfilein, 0, SEEK_END);
-	length = ftell(h->XMLfilein);
+	h->XMLlength = ftell(h->XMLfilein);
 	fseek(h->XMLfilein, 0, SEEK_SET);
-	h->XMLbuf = (char *)malloc(sizeof(char) * length);
-	if(!fread(h->XMLbuf, length, 1, h->XMLfilein))
+	h->XMLbuf = (char *)malloc(sizeof(char) * h->XMLlength);
+	if (!fread(h->XMLbuf, h->XMLlength, 1, h->XMLfilein))
 	{
 		printf("file read error\n");
 	}
 	fclose(h->XMLfilein);
-
-	//divide event
-	pdata = h->XMLbuf;
-	i = 0;
-	h->i_count_data_sets = 0;
-	error_state = 0;
-	while(i < length)
-	{
-		XMLDataSet *dataset = (XMLDataSet *)malloc(sizeof(XMLDataSet));
-		memset(dataset, 0, sizeof(XMLDataSet));
-		//when the rest is no more than max, deal in a separate way.
-		if(length - i < DATA_SET_MAX)
-		{
-			divide_event_edge(dataset, pdata, length - i);
-			i = length;
-		}
-		else
-		{
-			int64_t eventlen = divide_event(dataset, pdata);
-			pdata += eventlen;
-			i += eventlen;
-		}
-		if (error_state == 1)
-			return NULL;
-		h->pp_data_sets[h->i_count_data_sets++] = dataset;
-	}
 
 	//h->unresolved_stag_num = 0;
 	h->unresolved_stag_stack_head = (XMLSTagStack*)malloc(sizeof(XMLSTagStack));
@@ -71,13 +40,11 @@ void release_XML_file(XMLParserContext *h, char* outFile)
 		free(pstag);
 	}
 	free(h->unresolved_stag_stack_head);
-
 	h->XMLstreamout = fopen(outFile, "wb"); 
 	if (NULL == h->XMLstreamout)
 	{
 		printf("file open error 2\n");
 	}
-
 	for (i = 0; i < h->i_count_data_sets; i++)
 	{
 		XMLDataSet *dataset = h->pp_data_sets[i];
@@ -92,7 +59,7 @@ void release_XML_file(XMLParserContext *h, char* outFile)
 		}
 		//if (!fwrite(dataset->XMLstream, dataset->XMLstream_length, 1, h->XMLstreamout))
 		//	printf("file write %I64d error\n", i);
-
+		
 		free(dataset->XMLstream);
 		free(dataset);
 	}

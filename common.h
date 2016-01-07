@@ -5,6 +5,7 @@
 #include <string.h>
 #ifndef __GNUC__
 #include <stdint.h>
+#include <pthread.h>
 #else
 #include <sys/types.h>
 #include <sys/time.h>
@@ -16,6 +17,9 @@
 #define STAG_NAME_LEN 100
 
 int error_state;
+
+
+
 
 typedef enum XMLEventLabel_t
 {
@@ -78,8 +82,34 @@ typedef struct XMLParserContext_t
 	int64_t i_count_data_sets;
 	XMLDataSet *pp_data_sets[MAX_COUNT_DATA_SETS];
 
+	//multi-thread
+	int64_t i_parse;
+	int64_t i_post;
 	//int unresolved_stag_num;
 	XMLSTagStack* unresolved_stag_stack_head;
 }XMLParserContext;
+
+typedef struct stage_tag {
+	int stage_ID;                       /*1-divide 2-parse 3-post*/
+	pthread_mutex_t     mutex;          /* Protect data */
+	pthread_cond_t      avail;          /* Data available */
+	pthread_cond_t      ready;          /* Ready for data */
+	int                 data_ready;     /* Data present */
+	XMLParserContext	*h;
+	pthread_t           thread;         /* Thread for stage */
+	struct stage_tag    *next;          /* Next stage */
+} stage_t;
+
+/*
+* External structure representing the entire
+* pipeline.
+*/
+typedef struct pipe_tag {
+	pthread_mutex_t     mutex;          /* Mutex to protect pipe */
+	stage_t             *head;          /* First stage */
+	stage_t             *tail;          /* Final stage */
+	int                 stages;         /* Number of stages */
+	int                 active;         /* Active data elements */
+} pipe_t;
 
 #endif
