@@ -114,6 +114,7 @@ bool CharRef_judge(char *c)
 				return false;
 		}
 	}
+	return true;
 }
 
 bool EntityRef_judge(char *c)
@@ -208,7 +209,7 @@ bool Attribute_judge(char *c)
 		else
 			i++;
 	}
-	if ((c[i] == ' ' || c[i] == '\r' || c[i] == '\t' || c[i] == '\n') && c[i + 1] == "=")  //S=
+	if ((c[i] == ' ' || c[i] == '\r' || c[i] == '\t' || c[i] == '\n') && c[i + 1] == '=')  //S=
 	{
 		if (c[i + 2] != '"' && c[i + 2] != '\'')  //S=S
 		{
@@ -228,6 +229,7 @@ bool Attribute_judge(char *c)
 		else
 			return AttValue_judge(c + i + 1);
 	}
+	return true;
 }
 
 void CDATA_Parse(XMLEvents *current_event)
@@ -264,7 +266,9 @@ void CDATA_Parse(XMLEvents *current_event)
 void PI_Parse(XMLEvents *current_event)
 {
 	bool haveS = false;
-	int i, k, n = 2;
+	int i = 0;
+	int k = 0;
+	int n = 2;
 	current_event->event_stream = (char*)malloc(sizeof(char) * Event_Stream_Size);    //outstream buffer
 	memset(current_event->event_stream, 0, sizeof(char) * Event_Stream_Size);
 	current_event->event_stream[0] = 'P';
@@ -624,9 +628,9 @@ void ETAG_Parse(XMLEvents *current_event)
 		current_event->event_stream[2] = ' ';
 		i = 3;   //event_stream index
 		k = 2;   //p_event_start offset
-		while (current_event->p_event_start[k] != ' ' && current_event->p_event_start[k] != '\t' &&
+		while ((current_event->p_event_start[k] != ' ' && current_event->p_event_start[k] != '\t' &&
 			current_event->p_event_start[k] != '\n' && current_event->p_event_start[k] != '\r' &&
-			current_event->p_event_start[k] != '>')
+			current_event->p_event_start[k] != '>') || ((current_event->p_event_start[k] == ' '|| 				current_event->p_event_start[k] == '\t' || current_event->p_event_start[k] == '\n' || 				current_event->p_event_start[k] == '\r') && current_event->p_event_start[k + 1] != '>' ))
 		{
 			if (!NameChar_judge(current_event->p_event_start[k]))
 			{
@@ -649,7 +653,9 @@ void ETAG_Parse(XMLEvents *current_event)
 				current_event->event_stream[i++] = current_event->p_event_start[k++];
 			}
 		}
+		current_event->event_stream[i++] = ' ';
 	}
+	
 	current_event->i_event_length = k;
 	
 	current_event->i_event_stream_length = i;
@@ -658,31 +664,41 @@ void ETAG_Parse(XMLEvents *current_event)
 		printf("ETAG Parse is wrong, the error value is %d\n", statues);
 }
 
+void parse(XMLEvents *current_event)
+{
+    switch (current_event->i_label)
+    {
+        case STAG:
+            STAG_Parse(current_event);
+            break;
+        case ETAG:
+            ETAG_Parse(current_event);
+            break;
+        case COMMENT:
+            Comment_Parse(current_event);
+            break;
+        case PI:
+            PI_Parse(current_event);
+            break;
+        case CDATA:
+            CDATA_Parse(current_event);
+            break;
+    }
+}
+
+
 //deal with data sets and sequance them
-void parse_events(XMLParserContext *h, int64_t data_set_index)
+void parse_events(XMLParserContext *h)
 {
 	int j;
-	for (j = 0; j < h->pp_data_sets[data_set_index]->i_events; j++)
+    
+    CThreadPool *threadPool = pool_init(MAX_THREAD_NUM);
+	for (j = 0; j < h->pp_data_sets[h->i_parse]->i_events; j++)
 	{
-		XMLEvents *current_event = h->pp_data_sets[data_set_index]->events[j];
-		switch (current_event->i_label)
-		{
-		case STAG:
-			STAG_Parse(current_event);
-			break;
-		case ETAG:
-			ETAG_Parse(current_event);
-			break;
-		case COMMENT:
-			Comment_Parse(current_event);
-			break;
-		case PI:
-			PI_Parse(current_event);
-			break;
-		case CDATA:
-			CDATA_Parse(current_event);
-			break;
-		}
+		XMLEvents *current_event = h->pp_data_sets[h->i_parse]->events[j];
+        pool_add_task(threadPool, (void *)parse, current_event);
+        //parse(current_event);
 	}
+    pool_destroy(threadPool);
 }
 

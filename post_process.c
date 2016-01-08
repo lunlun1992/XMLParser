@@ -18,13 +18,14 @@ XMLSTagStack* pop_stag(XMLParserContext *h)
 
 
 //deal with STAG & ETAG match or not
-void post_process(XMLParserContext *h, int64_t data_set_index)
+void post_process(XMLParserContext *h)
 {
-	XMLDataSet* cur_dataset = h->pp_data_sets[data_set_index];
+	int i;
+	XMLDataSet* cur_dataset = h->pp_data_sets[h->i_post];
 	//cur_dataset->XMLstream_length = 0;
 	//cur_dataset->XMLstream = (char*)malloc(sizeof(char));
 
-	for (int i = 0; i < cur_dataset->i_events; i++)
+	for (i = 0; i < cur_dataset->i_events; i++)
 	{
 		XMLEvents *cur_event = cur_dataset->events[i];
 		/*
@@ -33,10 +34,16 @@ void post_process(XMLParserContext *h, int64_t data_set_index)
 		cur_dataset->XMLstream = (char*)realloc(cur_dataset->XMLstream, cur_dataset->XMLstream_length);
 		memcpy(cur_dataset->XMLstream + last_len, cur_event->event_stream, cur_event->i_event_stream_length);
 		//*/
+        
+        if (cur_event->event_stream == NULL)
+        {
+            printf("Error: Empty event_stream!\n");
+            return;
+        }
 
 		if (cur_event->event_stream[0] == 'S' && cur_event->event_stream[1] == 'E')
 		{
-			push_stag(h, data_set_index, i);
+			push_stag(h, h->i_post, i);
 		}
 		else if (cur_event->event_stream[0] == 'E' && cur_event->event_stream[1] == 'E')
 		{
